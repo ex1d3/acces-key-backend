@@ -21,15 +21,14 @@ public class CheckIPv6SupportService {
                 }
             }
         } catch (UnknownHostException ignored) {
-            // ignored
         }
 
         return false;
     }
 
     private String formatUrl(String siteUrl) {
-        if (siteUrl.startsWith("https://") | siteUrl.startsWith("http://")) {
-            siteUrl = siteUrl.substring(siteUrl.indexOf('/'));
+        if(siteUrl.startsWith("https://") | siteUrl.startsWith("http://")) {
+            siteUrl = siteUrl.substring(siteUrl.indexOf('/') + 2);
         }
         if (siteUrl.contains("/")) {
             siteUrl = siteUrl.split("/")[0];
