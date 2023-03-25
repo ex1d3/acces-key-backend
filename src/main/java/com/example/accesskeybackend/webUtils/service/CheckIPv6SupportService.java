@@ -1,21 +1,19 @@
 package com.example.accesskeybackend.webUtils.service;
 
 import org.springframework.stereotype.Service;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+
+import java.net.*;
+import java.util.Optional;
 
 @Service
 public class CheckIPv6SupportService {
 
+    private static String D_SCHEME = "https://";
+
     public boolean checkIPv6DnsRecord(String siteUrl) {
         try {
-            String domain = formatUrl(siteUrl);
-            final InetAddress[] resolvedAddresses = InetAddress.getAllByName(domain);
-
+            siteUrl = formatUrl(siteUrl).orElse("");
+            final InetAddress[] resolvedAddresses = InetAddress.getAllByName(siteUrl);
             for (final InetAddress address : resolvedAddresses) {
                 if (address instanceof Inet6Address) {
                     return true;
@@ -27,20 +25,21 @@ public class CheckIPv6SupportService {
         return false;
     }
 
-    private String formatUrl(String siteUrl) throws UnknownHostException {
-        if(siteUrl.startsWith("https://") | siteUrl.startsWith("http://")) {
-            siteUrl = siteUrl.substring(siteUrl.indexOf('/') + 2);
-        }
-        if (siteUrl.contains("/")) {
-            siteUrl = siteUrl.split("/")[0];
-        }
+    private static Optional<String> formatUrl(String siteUrl) throws UnknownHostException {
+
+        URI uri;
 
         try {
-            new URL(siteUrl).toURI();
-        } catch (MalformedURLException | URISyntaxException e) {
-            throw new UnknownHostException();
-        }
+            uri = new URI(siteUrl);
+            final String scheme = uri.getScheme();
 
-        return siteUrl;
+            if(scheme == null){
+                uri = new URI(D_SCHEME + siteUrl);
+            }
+
+            return Optional.ofNullable(uri.getHost());
+        } catch (final  URISyntaxException ignored) {
+            return Optional.empty();
+        }
     }
 }
